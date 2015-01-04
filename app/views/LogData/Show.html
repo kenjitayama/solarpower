@@ -1,0 +1,141 @@
+{{set . "title" "LogData"}}
+{{template "header.html" .}}
+
+{{with .logs}}
+<script type="text/javascript">
+
+$(function() {
+  $('#container').highcharts({
+    title: {
+      text: '発電量、売電量、買電量、消費量',
+      x: -20
+    },
+    subtitle: {
+      text: 'パナソニック 5.84 kW太陽光発電システム',
+      x: -20
+    },
+    xAxis: {
+      categories: [
+  {{range .}}
+        '{{.LogDate.Format "01/02 15"}}',
+  {{end}}
+      ]
+    },
+    yAxis: {
+      title: {
+        text: 'kW'
+      },
+      plotLines: [{
+        value: 0,
+        width: 1,
+        color: '#808080'
+      }]
+    },
+    tooltip: {
+      valueSuffix: 'kW'
+    },
+    legend: {
+      layout: 'vertical',
+      align: 'right',
+      verticalAlign: 'middle',
+      borderWidth: 0
+    },
+    series: [{
+      name: '発電量',
+      data: [
+  {{range .}}
+        {{.Generated}},
+  {{end}}
+      ]
+    }, {
+      name: '売電量',
+      data: [
+  {{range .}}
+        {{.Sold}},
+  {{end}}
+      ]
+    }, {
+      name: '買電量',
+      data: [
+  {{range .}}
+        {{.Bought}},
+  {{end}}
+      ]
+    }, {
+      name: '消費量',
+      data: [
+  {{range .}}
+        {{.Used}},
+  {{end}}
+      ]
+    }]
+  });
+});
+</script>
+{{end}}
+
+<header class="hero-unit" style="background-color:#A9F16C">
+  <div class="container">
+    <div class="row">
+      <div class="hero-text">
+        <h1>Solar Power Log</h1>
+        <p></p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="row">
+    <div class="span6">
+      {{template "flash.html" .}}
+    </div>
+  </div>
+</div>
+
+<div id="container" style="min-width: 640px; height: 480px; margin: 0 auto"></div>
+
+
+<form action="/LogData/Add" method="POST">
+{{with $field := field "logData" .}}
+  <div>
+    <textarea name="{{$field.Name}}" rows="10" style="width: 100%;">{{$field.Flash}}</textarea>
+  </div>
+{{end}}
+  <div>
+    <input type="submit" value="add" />
+  </div>
+</form>
+
+{{with .logs}}
+<table class="table">
+  <tr>
+    <th>日時</th>
+    <th>発電量</th>
+    <th>売電量</th>
+    <th>買電量</th>
+    <th>消費量</th>
+    <th>P1発電量</th>
+    <th>外部発電量</th>
+    <th>売電額</th>
+    <th>買電額</th>
+  </tr>
+  {{range .}}
+  <tr>
+    <td>{{.LogDate.Format "01/02 15"}}</td>
+    <td>{{.Generated}}</td>
+    <td>{{.Sold}}</td>
+    <td>{{.Bought}}</td>
+    <td>{{.Used}}</td>
+    <td>{{.P1Generated}}</td>
+    <td>{{.ExternalGenerated}}</td>
+    <td>{{.Income}}</td>
+    <td>{{.Outgo}}</td>
+  </tr>
+  {{end}}
+</table>
+{{end}}
+
+
+
+{{template "footer.html" .}}
